@@ -1,0 +1,4 @@
+--extra-index-url https://pkgs.dev.azure.com/poikus/_packaging/poikus/pypi/simple/
+PKSShared
+validators
+logging

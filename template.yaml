@@ -1,0 +1,247 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Bir ticaret işlemi kaydetme ve doğrulama fonksiyonu.
+Parameters:
+  AppId:
+    Description: "The application ID used for constructing the PermissionsBoundary."
+    Type: String
+    Default: "TradeJournal"
+  Stage:
+    Description: "The stage of the application."
+    Type: String
+    Default: "dev"
+  UserPoolArn:
+    Description: "The ARN of the Cognito User Pool."
+    Type: String
+  TablePrefix:
+    Description: "The prefix of the DynamoDB table."
+    Type: String
+    Default: "AccountTable"
+Globals:
+  Function:
+    Timeout: 3
+    MemorySize: 128
+    Tracing: Active
+  Api:
+    Cors:
+      AllowMethods: "'*'"
+      AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+      AllowOrigin: "'*'"
+      AllowCredentials: "'*'"
+    TracingEnabled: true
+    Auth:
+      DefaultAuthorizer: MyCognitoAuthorizer
+      Authorizers:
+        MyCognitoAuthorizer:
+          Type: COGNITO_USER_POOLS
+          UserPoolArn: !Sub ${UserPoolArn}
+      AddDefaultAuthorizerToCorsPreflight: false
+    GatewayResponses:
+      DEFAULT_4XX:
+        ResponseParameters:
+          Headers:
+            Access-Control-Allow-Origin: "'*'"
+            Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+            Access-Control-Allow-Methods: "'*'"
+      DEFAULT_5XX:
+        ResponseParameters:
+          Headers:
+            Access-Control-Allow-Origin: "'*'"
+            Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+            Access-Control-Allow-Methods: "'*'"
+Resources:
+  CheckHealth:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: source.service.check_health
+      Runtime: python3.9
+      Architectures:
+        - x86_64
+      Environment:
+        Variables:
+          STAGE: !Ref Stage
+      Events:
+        GetAllAccounts:
+          Type: Api
+          Properties:
+            Path: /
+            Method: get
+            Auth:
+              Authorizer: NONE
+  CreateAccount:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: ./
+      Handler: source.service.create_account  
+      Runtime: python3.9
+      Description: Create a trade journal entry
+      MemorySize: 128
+      Timeout: 10
+      Policies:
+        - DynamoDBWritePolicy:
+            TableName: !Sub "${TablePrefix}-${Stage}"
+      Environment: 
+        Variables:
+          TABLE_NAME: !Sub "${TablePrefix}-${Stage}"
+          STAGE: !Ref Stage
+      Events:
+        TradeApi:
+          Type: Api
+          Properties:
+            Path: /account
+            Method: post
+  ListAccounts:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: source.service.list_accounts  # Dosya adı ve fonksiyon adı.
+      Runtime: python3.9
+      Description: List trade journal entries
+      MemorySize: 128
+      Timeout: 10
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Sub "${TablePrefix}-${Stage}"
+      Environment:
+        Variables:
+          TABLE_NAME: !Sub "${TablePrefix}-${Stage}"
+          STAGE: !Ref Stage
+      Events:
+        TradeApi:
+          Type: Api
+          Properties:
+            Path: /list
+            Method: get
+  GetTrade:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: source.service.get_account  # Dosya adı ve fonksiyon adı.
+      Runtime: python3.9
+      Description: Get a trade journal entry
+      MemorySize: 128
+      Timeout: 10
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Sub "${TablePrefix}-${Stage}"
+      Environment:
+        Variables:
+          TABLE_NAME: !Sub "${TablePrefix}-${Stage}"
+          STAGE: !Ref Stage
+      Events:
+        TradeApi:
+          Type: Api
+          Properties:
+            Path: /account/{account_id}
+            Method: get
+  
+  UpdateAccount:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: ./
+      Handler: source.service.update_account  # Dosya adı ve fonksiyon adı.
+      Runtime: python3.9
+      Description: Create a trade journal entry
+      MemorySize: 128
+      Timeout: 10
+      Policies:
+        - DynamoDBWritePolicy:
+            TableName: !Sub "${TablePrefix}-${Stage}"
+      Environment: 
+        Variables:
+          TABLE_NAME: !Sub "${TablePrefix}-${Stage}"
+          STAGE: !Ref Stage
+      Events:
+        TradeApi:
+          Type: Api
+          Properties:
+            Path: /account/{account_id}
+            Method: put
+  PassivateAccount:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: source.service.passivate_account  # Dosya adı ve fonksiyon adı.
+      Runtime: python3.9
+      Description: Delete a trade journal entry
+      MemorySize: 128
+      Timeout: 10
+      Policies:
+        - DynamoDBWritePolicy:
+            TableName: !Sub "${TablePrefix}-${Stage}"
+      Environment:
+        Variables:
+          TABLE_NAME: !Sub "${TablePrefix}-${Stage}"
+          STAGE: !Ref Stage
+      Events:
+        TradeApi:
+          Type: Api
+          Properties:
+            Path: /account/{account_id}/passivate
+            Method: put
+  DynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${TablePrefix}-${Stage}"
+      AttributeDefinitions:
+        - AttributeName: accountId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: accountId
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+
+  ApplicationResourceGroup:
+    Type: AWS::ResourceGroups::Group
+    Properties:
+      Name:
+        Fn::Sub: ApplicationInsights-SAM-${AWS::StackName}
+      ResourceQuery:
+        Type: CLOUDFORMATION_STACK_1_0
+  ApplicationInsightsMonitoring:
+    Type: AWS::ApplicationInsights::Application
+    Properties:
+      ResourceGroupName:
+        Ref: ApplicationResourceGroup
+      AutoConfigurationEnabled: 'true'
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  CheckHealth:
+    Description: "Check Health"
+    Value: !Ref CheckHealth
+  CheckHealthIamRole:
+    Description: "Check Health Iam Role"
+    Value: !GetAtt CheckHealthRole.Arn
+  CreateAccount:
+    Description: "Create Account"
+    Value: !Ref CreateAccount
+  CreateAccountIamRole:
+    Description: "Create Account Iam Role"
+    Value: !GetAtt CreateAccountRole.Arn
+  ListAccounts:
+    Description: "List Accounts"
+    Value: !Ref ListAccounts
+  ListAccountsIamRole:
+    Description: "List Accounts Iam Role"
+    Value: !GetAtt ListAccountsRole.Arn
+  GetTrade: 
+    Description: "Get Trade"
+    Value: !Ref GetTrade
+  GetTradeIamRole:
+    Description: "Get Trade Iam Role"
+    Value: !GetAtt GetTradeRole.Arn
+  UpdateAccount:  
+    Description: "Update Account"
+    Value: !Ref UpdateAccount
+  UpdateAccountIamRole:
+    Description: "Update Account Iam Role"
+    Value: !GetAtt UpdateAccountRole.Arn
+  PassivateAccount:
+    Description: "Passivate Account"
+    Value: !Ref PassivateAccount
+  PassivateAccountIamRole: 
+    Description: "Passivate Account Iam Role"
+    Value: !GetAtt PassivateAccountRole.Arn
