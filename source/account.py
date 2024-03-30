@@ -28,6 +28,7 @@ class Account:
                 monthly_trade_limit: Decimal = None,
                 yearly_trade_limit: Decimal = None,
                 favorite_pair: str = None,
+                account_owner: str = None,
     ):
         self.account_id = account_id
         self.account_name = account_name
@@ -46,107 +47,133 @@ class Account:
         self.monthly_trade_limit = monthly_trade_limit
         self.yearly_trade_limit = yearly_trade_limit
         self.favorite_pair = favorite_pair
+        self.account_owner = account_owner
+
+
     def validate_account_id(self) -> [PKSShared.BaseError]:
         errors = []
         if self.account_id is None or not isinstance(self.account_id, str) or not validators.uuid(self.account_id):
             errors.append(PKSShared.BaseError(
-                "Account.accountId.invalid", "Account Id is invalid"))
+                "account.accountId.invalid", "Account Id is invalid"))
         return errors
+    
+
     def validate_account_name(self) -> [PKSShared.BaseError]:
         errors = []
         if self.account_name is None or not isinstance(self.account_name, str) or len(self.account_name) < 1:
             errors.append(PKSShared.BaseError(
-                "Account.accountName.invalid", "Account Name is invalid"))
+                "account.accountName.invalid", "Account Name is invalid"))
         return errors
+    
+
     def validate_account_balance(self) -> [PKSShared.BaseError]:
         errors = []
         if self.account_balance is None or not isinstance(self.account_balance, Decimal) or self.account_balance < 0:
             errors.append(PKSShared.BaseError(
-                "Account.accountBalance.invalid", "Account Balance is invalid"))
+                "account.accountBalance.invalid", "Account Balance is invalid"))
         return errors
+
+
     def validate_account_risk(self) -> [PKSShared.BaseError]:
         errors = []
         if self.account_risk is None or not isinstance(self.account_risk, Decimal) or self.account_risk < 0:
             errors.append(PKSShared.BaseError(
-                "Account.accountRisk.invalid", "Account Risk is invalid"))
+                "account.accountRisk.invalid", "Account Risk is invalid"))
         return errors
+
+
     def validate_daily_target(self) -> [PKSShared.BaseError]:
         errors = []
         if self.daily_target is None or not isinstance(self.daily_target, Decimal) or self.daily_target < 0:
             errors.append(PKSShared.BaseError(
-                "Account.dailyTarget.invalid", "Daily Target is invalid"))
+                "account.dailyTarget.invalid", "Daily Target is invalid"))
         return errors
+    
+
     def validate_weekly_target(self) -> [PKSShared.BaseError]:
         errors = []
         if self.weekly_target is None or not isinstance(self.weekly_target, Decimal) or self.weekly_target < 0:
             errors.append(PKSShared.BaseError(
-                "Account.weeklyTarget.invalid", "Weekly Target is invalid"))
+                "account.weeklyTarget.invalid", "Weekly Target is invalid"))
         return errors
+    
+
     def validate_monthly_target(self) -> [PKSShared.BaseError]:
         errors = []
         if self.monthly_target is None or not isinstance(self.monthly_target, Decimal) or self.monthly_target < 0:
             errors.append(PKSShared.BaseError(
-                "Account.monthlyTarget.invalid", "Monthly Target is invalid"))
+                "account.monthlyTarget.invalid", "Monthly Target is invalid"))
         return errors
+    
+
     def validate_yearly_target(self) -> [PKSShared.BaseError]:
         errors = []
         if self.yearly_target is None or not isinstance(self.yearly_target, Decimal) or self.yearly_target < 0:
             errors.append(PKSShared.BaseError(
-                "Account.yearlyTarget.invalid", "Yearly Target is invalid"))
+                "account.yearlyTarget.invalid", "Yearly Target is invalid"))
         return errors
+    
+
     def validate_max_daily_loss(self) -> [PKSShared.BaseError]:
         errors = []
         if self.max_daily_loss is None or not isinstance(self.max_daily_loss, Decimal) or self.max_daily_loss < 0:
             errors.append(PKSShared.BaseError(
-                "Account.maxDailyLoss.invalid", "Max Daily Loss is invalid"))
+                "account.maxDailyLoss.invalid", "Max Daily Loss is invalid"))
         return errors
+    
+
     def validate_max_weekly_loss(self) -> [PKSShared.BaseError]:
         errors = []
         if self.max_weekly_loss is None or not isinstance(self.max_weekly_loss, Decimal) or self.max_weekly_loss < 0:
             errors.append(PKSShared.BaseError(
-                "Account.maxWeeklyLoss.invalid", "Max Weekly Loss is invalid"))
+                "account.maxWeeklyLoss.invalid", "Max Weekly Loss is invalid"))
         return errors
     def validate_max_monthly_loss(self) -> [PKSShared.BaseError]:
         errors = []
         if self.max_monthly_loss is None or not isinstance(self.max_monthly_loss, Decimal) or self.max_monthly_loss < 0:
             errors.append(PKSShared.BaseError(
-                "Account.maxMonthlyLoss.invalid", "Max Monthly Loss is invalid"))
+                "account.maxMonthlyLoss.invalid", "Max Monthly Loss is invalid"))
         return errors
     def validate_max_yearly_loss(self) -> [PKSShared.BaseError]:
         errors = []
         if self.max_yearly_loss is None or not isinstance(self.max_yearly_loss, Decimal) or self.max_yearly_loss < 0:
             errors.append(PKSShared.BaseError(
-                "Account.maxYearlyLoss.invalid", "Max Yearly Loss is invalid"))
+                "account.maxYearlyLoss.invalid", "Max Yearly Loss is invalid"))
         return errors
     def validate_daily_trade_limit(self) -> [PKSShared.BaseError]:
         errors = []
         if self.daily_trade_limit is None or not isinstance(self.daily_trade_limit, Decimal) or self.daily_trade_limit < 0:
             errors.append(PKSShared.BaseError(
-                "Account.dailyTradeLimit.invalid", "Daily Trade Limit is invalid"))
+                "account.dailyTradeLimit.invalid", "Daily Trade Limit is invalid"))
         return errors
     def validate_weekly_trade_limit(self) -> [PKSShared.BaseError]:
         errors = []
         if self.weekly_trade_limit is None or not isinstance(self.weekly_trade_limit, Decimal) or self.weekly_trade_limit < 0:
             errors.append(PKSShared.BaseError(
-                "Account.weeklyTradeLimit.invalid", "Weekly Trade Limit is invalid"))
+                "account.weeklyTradeLimit.invalid", "Weekly Trade Limit is invalid"))
         return errors
     def validate_monthly_trade_limit(self) -> [PKSShared.BaseError]:
         errors = []
         if self.monthly_trade_limit is None or not isinstance(self.monthly_trade_limit, Decimal) or self.monthly_trade_limit < 0:
             errors.append(PKSShared.BaseError(
-                "Account.monthlyTradeLimit.invalid", "Monthly Trade Limit is invalid"))
+                "account.monthlyTradeLimit.invalid", "Monthly Trade Limit is invalid"))
         return errors
     def validate_yearly_trade_limit(self) -> [PKSShared.BaseError]:
         errors = []
         if self.yearly_trade_limit is None or not isinstance(self.yearly_trade_limit, Decimal) or self.yearly_trade_limit < 0:
             errors.append(PKSShared.BaseError(
-                "Account.yearlyTradeLimit.invalid", "Yearly Trade Limit is invalid"))
+                "account.yearlyTradeLimit.invalid", "Yearly Trade Limit is invalid"))
         return errors
     def validate_favorite_pair(self) -> [PKSShared.BaseError]:
         errors = []
         if self.favorite_pair is None or not isinstance(self.favorite_pair, str) or len(self.favorite_pair) < 1:
             errors.append(PKSShared.BaseError(
-                "Account.favoritePair.invalid", "Favorite Pair is invalid"))
+                "account.favoritePair.invalid", "Favorite Pair is invalid"))
+    def validate_account_owner(self) -> [PKSShared.BaseError]:
+        errors = []
+        if self.account_owner is None or not isinstance(self.account_owner, str) or len(self.account_owner) < 1:
+            errors.append(PKSShared.BaseError(
+                "account.accountOwner.invalid", "Account Owner is invalid"))
         return errors
     def validate(self) -> [PKSShared.BaseError]:
         errors = []
@@ -167,25 +194,31 @@ class Account:
         errors.extend(self.validate_monthly_trade_limit())
         errors.extend(self.validate_yearly_trade_limit())
         errors.extend(self.validate_favorite_pair())
+        errors.extend(self.validate_account_owner())
         return errors
     
 
     @staticmethod
     def from_dict(data):
+        ## CAMEL CASE OLMALI
         accountId = data.get('account_id') if data.get('account_id') is not None else str(uuid.uuid4())
         accountName = data.get('account_name')
         accountBalance = None
         if data.get('account_balance') is not None and isinstance(data.get('account_balance'), (Decimal, int, float)):
             accountBalance = Decimal(data.get('account_balance'))
+
         accountRisk = None
         if data.get('account_risk') is not None and isinstance(data.get('account_risk'), (Decimal, int, float)):
             accountRisk = Decimal(data.get('account_risk'))
+
         dailyTarget = None
         if data.get('daily_target') is not None and isinstance(data.get('daily_target'), (Decimal, int, float)):
             dailyTarget = Decimal(data.get('daily_target'))
+
         weeklyTarget = None
         if data.get('weekly_target') is not None and isinstance(data.get('weekly_target'), (Decimal, int, float)):
             weeklyTarget = Decimal(data.get('weekly_target'))
+
         monthlyTarget = None
         if data.get('monthly_target') is not None and isinstance(data.get('monthly_target'), (Decimal, int, float)):
             monthlyTarget = Decimal(data.get('monthly_target'))
@@ -217,6 +250,7 @@ class Account:
         if data.get('yearly_trade_limit') is not None and isinstance(data.get('yearly_trade_limit'), (Decimal, int, float)):
             yearlyTradeLimit = Decimal(data.get('yearly_trade_limit'))
         favoritePair = data.get('favorite_pair')
+        accountOwner = data.get('account_owner')
         return Account(
             accountId,
             accountName,
@@ -234,7 +268,8 @@ class Account:
             weeklyTradeLimit,
             monthlyTradeLimit,
             yearlyTradeLimit,
-            favoritePair
+            favoritePair,
+            accountOwner
         )
 
         
@@ -258,7 +293,9 @@ class Account:
             "weeklyTradeLimit": self.weekly_trade_limit,
             "monthlyTradeLimit": self.monthly_trade_limit,
             "yearlyTradeLimit": self.yearly_trade_limit,
-            "favoritePair": self.favorite_pair
+            "favoritePair": self.favorite_pair,
+            "accountOwner": self.account_owner
+
         }
     
 
